@@ -7,3 +7,4 @@ riderModule.iml
 .env
 .env.dev
 certs/
+logs/

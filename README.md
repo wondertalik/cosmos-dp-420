@@ -38,3 +38,9 @@ docker compose -f docker-compose.yaml -f docker-compose.observability.yaml --env
 ```bash
 docker compose -f docker-compose.yaml -f docker-compose.observability.yaml --env-file .env.dev -p cosmos-dp420 down
 ```
+
+- connect to cosmos db shell
+
+```bash
+docker compose -f docker-compose.yaml -f docker-compose.observability.yaml --env-file .env.dev -p cosmos-dp420 exec cosmos cosmoshell.sh
+```

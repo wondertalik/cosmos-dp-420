@@ -39,6 +39,8 @@ services:
     image: mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:vnext-EN20260602
     volumes:
       - ${VOLUMES_PATH}/cosmos/data:/usr/cosmos/data
+      - ./cosmos-init:/init
+      - ./logs/cosmos:/logs
     ports:
       - "${COSMOS_CONTAINER_HEALTH_PORT:-8080}:8080"
       - "${COSMOS_CONTAINER_PORT:-8081}:8081"
