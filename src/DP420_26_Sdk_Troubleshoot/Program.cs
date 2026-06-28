@@ -13,7 +13,7 @@ string endpoint = configurationRoot.GetValue<string>("Endpoint") ?? throw new Ar
 string connectionString = "AccountEndpoint=" + endpoint + ";AccountKey=" + key;
 
 CosmosClient client = new(connectionString,
-    new CosmosClientOptions()
+    new CosmosClientOptions
     {
         AllowBulkExecution = true,
         MaxRetryAttemptsOnRateLimitedRequests = 50,
@@ -46,20 +46,22 @@ while ((consoleinputcharacter = Console.ReadLine()) != "5")
     {
         switch (ex.StatusCode.ToString())
         {
-            case ("Conflict"):
+            case "Conflict":
                 Console.WriteLine("Insert Failed. Response Code (409).");
-                Console.WriteLine("Can not insert a duplicate partition key, customer with the same ID already exists."); 
+                Console.WriteLine(
+                    "Can not insert a duplicate partition key, customer with the same ID already exists.");
                 break;
-            case ("Forbidden"):
+            case "Forbidden":
                 Console.WriteLine("Response Code (403).");
-                Console.WriteLine("The request was forbidden to complete. Some possible reasons for this exception are:");
+                Console.WriteLine(
+                    "The request was forbidden to complete. Some possible reasons for this exception are:");
                 Console.WriteLine("Firewall blocking requests.");
                 Console.WriteLine("Partition key exceeding storage.");
                 Console.WriteLine("Non-data operations are not allowed.");
                 break;
-            case ("TooManyRequests"):
-            case ("ServiceUnavailable"):
-            case ("RequestTimeout"):
+            case "TooManyRequests":
+            case "ServiceUnavailable":
+            case "RequestTimeout":
                 // Check if the issues are related to connectivity and if so, wait 10 seconds to retry.
                 await Task.Delay(10000); // Wait 10 seconds
                 try
@@ -72,11 +74,12 @@ while ((consoleinputcharacter = Console.ReadLine()) != "5")
                     Console.WriteLine("Insert Failed. " + e2.Message);
                     Console.WriteLine("Can not insert a duplicate partition key, Connectivity issues encountered.");
                 }
+
                 break;
-            case ("NotFound"):
+            case "NotFound":
                 Console.WriteLine("Delete Failed. Response Code (404).");
                 Console.WriteLine("Can not delete customer, customer not found.");
-                break;      
+                break;
             default:
                 Console.WriteLine(ex.Message);
                 break;

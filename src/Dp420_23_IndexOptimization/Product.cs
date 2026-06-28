@@ -1,7 +1,7 @@
 namespace Dp420_23_IndexOptimization;
 
 public record Product(
-    string id, 
+    string id,
     string categoryId,
     string categoryName,
     string sku,
