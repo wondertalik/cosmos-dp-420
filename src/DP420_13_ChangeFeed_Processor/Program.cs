@@ -1,4 +1,5 @@
-﻿using DP420_13_ChangeFeed;
+﻿using DP420_13_ChangeFeed_Processor;
+using DP420_13_ChangeFeed_Processor.Models;
 using Newtonsoft.Json;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Configuration;
