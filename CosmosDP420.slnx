@@ -1,5 +1,6 @@
 <Solution>
   <Project Path="src/DP420_26_Sdk_Troubleshoot/DP420_26_Sdk_Troubleshoot.csproj" />
+  <Project Path="src/DP420_13_ChangeFeed_AzureFunction/DP420_13_ChangeFeed_AzureFunction.csproj" />
   <Project Path="src/Dp420_23_IndexOptimization/Dp420_23_IndexOptimization.csproj" />
   <Project Path="src\DP420_13_ChangeFeed_Processor\DP420_13_ChangeFeed_Processor.csproj" />
 </Solution>
