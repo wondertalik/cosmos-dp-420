@@ -6,13 +6,6 @@ Cosmos implementation.
 
 ### Run during development
 
-Authentication is required to pull images from Azure Container Registry.
-Signin with the corporate account and use an "Opticom Subscription" subscription.
-
-```bash
-az login
-```
-
 We use [docker compose](https://docs.docker.com/compose/) to run dependencies.
 
 From a root directory of project run commands:

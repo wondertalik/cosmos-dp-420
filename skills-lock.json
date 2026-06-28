@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "skills": {
+    "cosmosdb-ai-and-search": {
+      "source": "AzureCosmosDB/cosmosdb-agent-kit",
+      "sourceType": "github",
+      "skillPath": "skills/cosmosdb-ai-and-search/SKILL.md",
+      "computedHash": "8cac121460702716c18ddda5afce10effd7aa07864b00bec4fc3adb5bb12d4ad"
+    },
+    "cosmosdb-best-practices": {
+      "source": "AzureCosmosDB/cosmosdb-agent-kit",
+      "sourceType": "github",
+      "skillPath": "skills/cosmosdb-best-practices/SKILL.md",
+      "computedHash": "ac0c2da6a5a30e32a6a05cd971522d6b1d6eaab621136bf49b41e329372afd03"
+    },
+    "cosmosdb-data-and-queries": {
+      "source": "AzureCosmosDB/cosmosdb-agent-kit",
+      "sourceType": "github",
+      "skillPath": "skills/cosmosdb-data-and-queries/SKILL.md",
+      "computedHash": "e18f5d4f240f48620058c203a34dbf714588448608a64cb92073c2679ca6e579"
+    },
+    "cosmosdb-operations": {
+      "source": "AzureCosmosDB/cosmosdb-agent-kit",
+      "sourceType": "github",
+      "skillPath": "skills/cosmosdb-operations/SKILL.md",
+      "computedHash": "148334ea8416e8f44877b1133fda3de6c5d3828551e603503ba90f8cd6937c78"
+    },
+    "cosmosdb-sdk": {
+      "source": "AzureCosmosDB/cosmosdb-agent-kit",
+      "sourceType": "github",
+      "skillPath": "skills/cosmosdb-sdk/SKILL.md",
+      "computedHash": "ccf88a3a3fb423b14b28fd429a82737772df3fa53e7a7e72f48daa1ccd885356"
+    }
+  }
+}
