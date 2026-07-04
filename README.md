@@ -10,6 +10,27 @@ We use [docker compose](https://docs.docker.com/compose/) to run dependencies.
 
 From a root directory of project run commands:
 
+- install CosmosDBShell version used by both Copilot and Claude MCP clients
+
+The published NuGet versions (through at least `1.1.115-preview`) have bugs that break Claude Code (invalid MCP protocol version, and a `CancellationTokenSource` disposal bug that fails every MCP tool call). **For now**, build and install the locally-patched fork instead of a plain `dotnet tool install`/`update` — see `ai-context/SPEC.md`'s "Known issue #1" and "Known issue #2" for the exact commands. Confirm with:
+
+```bash
+dotnet tool install --global --add-source "cosmosdbshell" CosmosDBShell --version "1.1.123-preview.g8da79a2066"
+```
+
+```bash
+cosmosdbshell --version
+# -> CosmosDBShell 1.1.123-preview (8da79a2066)  [or later, once the upstream PRs ship]
+```
+
+- run Cosmos DB Shell MCP in a separate terminal (required for local Cosmos vNext emulator MCP access)
+
+```bash
+cosmosdbshell --mcp --connect "AccountEndpoint=https://localhost:8081/;AccountKey=C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==" --connect-mode gateway
+```
+
+The repository `.mcp.json` is configured for **Streamable HTTP** (`type: "http"`, `url: "http://127.0.0.1:6128/"`), not SSE — so start the shell command above before using MCP tools.
+
 - run all development services
 
 ```bash
