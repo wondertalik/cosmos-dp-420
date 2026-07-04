@@ -29,7 +29,33 @@ cosmosdbshell --version
 cosmosdbshell --mcp --connect "AccountEndpoint=https://localhost:8081/;AccountKey=C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==" --connect-mode gateway
 ```
 
-The repository `.mcp.json` is configured for **Streamable HTTP** (`type: "http"`, `url: "http://127.0.0.1:6128/"`), not SSE — so start the shell command above before using MCP tools.
+The repository `.mcp.json` is configured for **Streamable HTTP** (`type: "http"`, `url: "http://127.0.0.1:6128/"`) — so start the shell command above before using MCP tools.
+
+### Environment file (`.env.dev`)
+
+Every `docker compose` command below passes `--env-file .env.dev` — the stack won't start without it. It's gitignored and never committed, so create it yourself in the repo root before the first run. These are the variables `docker-compose.yaml` and `docker-compose.observability.yaml` actually read:
+
+```bash
+# Host path where Cosmos/Azurite data persists across restarts
+VOLUMES_PATH=~/path/to/some/writable/dir
+
+# Ports exposed on the host
+COSMOS_CONTAINER_HEALTH_PORT=8080
+COSMOS_CONTAINER_PORT=8081
+COSMOS_EXPLORER_PORT=1234
+
+# Azurite (blob/queue/table emulator) connection string — well-known default, not a secret
+AZURITE_CONNECTION_STRING=DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;QueueEndpoint=http://azurite:10001/devstoreaccount1;TableEndpoint=http://azurite:10002/devstoreaccount1
+
+# Certificate filenames from the "Self-signed certificate" section below — must exist under ./certs
+HTTPS_CERT_NAME_CRT=dev1.crt
+HTTPS_CERT_NAME_KEY=dev1.key
+HTTPS_CERT_NAME_PEM=dev1.pem
+
+# Observability stack only (docker-compose.observability.yaml)
+COSMOS_ENABLE_OTLP=true
+ASPIRE_DASHBOARD_OTLP_PRIMARYAPIKEY=myprimaryapikey
+```
 
 - run all development services
 
@@ -53,6 +79,95 @@ docker compose -f docker-compose.yaml -f docker-compose.observability.yaml --env
 
 ```bash
 docker compose -f docker-compose.yaml -f docker-compose.observability.yaml --env-file .env.dev -p cosmos-dp420 exec cosmos cosmoshell.sh
+```
+
+### Self-signed certificate
+
+Before start need to generate self-signed certificates.
+More detail in an
+official [docs](https://learn.microsoft.com/en-us/dotnet/core/additional-tools/self-signed-certificates-guide#with-openssl)
+
+```bash
+#!/bin/bash
+
+PARENT="dev1"
+
+# Array of DNS entries
+DNS_ENTRIES=(
+    "localhost"
+    "aspire-dashboard"
+    "seq"
+    "jaeger"
+    "cadvisor"
+    "prometheus"
+    "aspire-dashboard"
+    "otel-collector"
+)
+
+# Generate the DNS entries with proper numbering
+DNS_SECTION=""
+ORDER=1
+for DNS in "${DNS_ENTRIES[@]}"; do
+    DNS_SECTION+="DNS.${ORDER} = ${DNS}\n"
+    ((ORDER++))
+    DNS_SECTION+="DNS.${ORDER} = www.${DNS}\n"
+    ((ORDER++))
+done
+
+openssl req \
+-x509 \
+-newkey rsa:4096 \
+-sha256 \
+-days 365 \
+-nodes \
+-keyout $PARENT.key \
+-out $PARENT.crt \
+-subj "/CN=${PARENT}" \
+-extensions v3_ca \
+-extensions v3_req \
+-config <( \
+  echo '[req]'; \
+  echo 'default_bits= 4096'; \
+  echo 'distinguished_name=req'; \
+  echo 'x509_extension = v3_ca'; \
+  echo 'req_extensions = v3_req'; \
+  echo '[v3_req]'; \
+  echo 'basicConstraints = CA:FALSE'; \
+  echo 'keyUsage = nonRepudiation, digitalSignature, keyEncipherment'; \
+  echo 'subjectAltName = @alt_names'; \
+  echo '[ alt_names ]'; \
+  echo -e "${DNS_SECTION}"; \
+  echo '[v3_ca]'; \
+  echo 'subjectKeyIdentifier=hash'; \
+  echo 'authorityKeyIdentifier=keyid:always,issuer'; \
+  echo 'basicConstraints = critical, CA:TRUE, pathlen:0'; \
+  echo 'keyUsage = critical, cRLSign, keyCertSign'; \
+  echo 'extendedKeyUsage = serverAuth, clientAuth')
+
+openssl x509 -noout -text -in $PARENT.crt
+openssl x509 -in $PARENT.crt -out $PARENT.pem -outform PEM
+
+openssl pkcs12 -export -out dev1.pfx -inkey dev1.key -in dev1.crt
+```
+
+Generate certificates
+
+```bash
+mkdir certs && cd certs
+chmod +x certs.sh
+./certs.sh
+```
+
+Install certs in your system
+
+- on Mac OS
+
+```bash
+rm -rf ~/.aspnet
+dotnet dev-certs https --trust --verbose
+
+sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain certs/dev1.crt
+sudo security import certs/dev1.key -k /Library/Keychains/System.keychain
 ```
 
 ## SEEDING DATA
