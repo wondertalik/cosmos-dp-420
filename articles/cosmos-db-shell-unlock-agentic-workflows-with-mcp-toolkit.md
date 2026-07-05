@@ -103,41 +103,42 @@ One more thing worth a mention here, even though it's already covered in that sa
 
 With the `cosmosdb` MCP connection live and the agent kit installed, I used this prompt to generate `database-v1`'s own skill and context pair — instead of pasting the whole schema into my system prompt (and `v2`'s, and `v3`'s, and `v4`'s, just in case):
 
-> Generate a Cosmos DB schema-context skill for database-v1 in this repo, following the exact pattern of the existing cosmosdb-sdk / cosmosdb-data-and-queries skills.
->
-> **1. `.agents/skills/cosmosdb-context-database-v1/SKILL.md`**
->
-> YAML frontmatter:
-> - `name`: `cosmosdb-context-database-v1`
-> - `description`: a multi-line block covering: what this is (schema context for database-v1), a one-line schema summary (normalized/hybrid/denormalized, container count, approx. document count, list of container names), that every container's partition key is `/id` (or whatever's actually true), that it's part of the same skill family as `cosmosdb-sdk`, `cosmosdb-data-and-queries`, `cosmosdb-best-practices`, `cosmosdb-operations`, `cosmosdb-ai-and-search`, then explicit USE FOR: / DO NOT USE FOR: lines (use for querying/modeling/seeding against database-v1 specifically and knowing its foreign-key relationships; do not use for database-v2/v3/v4, general SDK/query/throughput guidance already covered by the sibling skills). Keep the entire description field under 1000 characters — trim examples/relationship lists if needed to fit; don't let it run long like a full doc.
-> - `license`: MIT
-> - `metadata`: `{ author: repo-local, version: "1.0.0" }`
->
-> Body sections, in this order:
-> - `# Cosmos DB schema context: database-v1`
-> - A section on database-level throughput: shared vs. dedicated, autoscale vs. manual, the RU/s ceiling — described as outcomes ("provisions throughput at the database level, shared across all N containers"), not as the commands/flags used to set it up. State whether shared-vs-dedicated is changeable later or locked in permanently, and point to the ai-context file for how it was confirmed.
-> - A section with a Container | Partition key | Unique keys table for every container, plus one sentence on whether unique keys or dedicated throughput are configured anywhere — again as outcomes only, never naming the CLI flag that would or wouldn't set them.
-> - A "When you need more than this" section pointing to the ai-context file for per-container field shapes, indexing policy defaults, naming gotchas, and example queries.
-> - A "When to Apply" section: trigger for database-v1-specific work, explicitly not for v2/v3/v4.
->
-> Hard rule for this file: never mention how the database/containers/items were created — no `mkdb`, `mkcon`, `mkitem`, `--unique_key`, `.csh` script names, or any other infrastructure/provisioning command or flag. This file describes the database's current shape and configuration, not how it got that way. Anything about how a claim was verified belongs only in the ai-context file below.
->
-> **2. `ai-context/cosmosdb-context-database-v1.md`**
->
-> The deep-dive companion, with:
-> - An intro paragraph on what schema variant this is, and how it relates to this repo's other database versions.
-> - A "Structure and configuration" section: compact per-container field shapes (`{ field, field, [] }`, `[]` marks arrays), with a note on where each container's shape was sourced from (init script or live query — this file is allowed to cover provisioning mechanics), and the total document count.
-> - A database-level config subsection: throughput mode confirmed via a live check against the running emulator (state exactly which MCP tool/command call confirmed it) or via the init script that created it — say which source backs the claim.
-> - A per-container config subsection: partition key, unique keys, dedicated throughput, indexing policy — as a table, each row noting whether it's immutable-after-creation or changeable-later, plus the exact init-script line or live-shell check that backs it.
-> - A "Gotchas" section for anything confusable (similarly-named containers, non-obvious foreign keys, composite ids).
-> - An "Example MCP-shell queries" section with real, working queries run against the live cosmosdb MCP connection, each with a one-line explanation of what it returns.
->
-> Ground every config claim in one of two sources: the actual creation flags in the repo's init scripts, or a live check against the running emulator via the cosmosdb MCP tools (`ls`, `query`, `throughput`, `info`) — state which source backs each claim. Cross-link the two files with `@ai-context/...` references. Match document counts to README.md's table. Don't fabricate anything not verifiable from the scripts or the live shell.
->
-> **3. Symlinks**
->
-> Create relative symlinks so Copilot and Claude pick up the skill the same way the other cosmosdb-* skills are wired: `.claude/skills/cosmosdb-context-database-v1 -> ../../.agents/skills/cosmosdb-context-database-v1` and `.github/skills/cosmosdb-context-database-v1 -> ../../.agents/skills/cosmosdb-context-database-v1`.
+```text
+Generate a Cosmos DB schema-context skill for database-v1 in this repo, following the exact pattern of the existing cosmosdb-sdk / cosmosdb-data-and-queries skills.
 
+1. .agents/skills/cosmosdb-context-database-v1/SKILL.md
+
+YAML frontmatter:
+
+name: cosmosdb-context-database-v1
+description: a multi-line block covering: what this is (schema context for database-v1), a one-line schema summary (normalized/hybrid/denormalized, container count, approx. document count, list of container names), that every container's partition key is /id (or whatever's actually true), that it's part of the same skill family as cosmosdb-sdk, cosmosdb-data-and-queries, cosmosdb-best-practices, cosmosdb-operations, cosmosdb-ai-and-search, then explicit USE FOR: / DO NOT USE FOR: lines (use for querying/modeling/seeding against database-v1 specifically and knowing its foreign-key relationships; do not use for database-v2/v3/v4, general SDK/query/throughput guidance already covered by the sibling skills). Keep the entire description field under 1000 characters - trim examples/relationship lists if needed to fit; don't let it run long like a full doc.
+license: MIT
+metadata: { author: repo-local, version: "1.0.0" }
+Body sections, in this order:
+
+# Cosmos DB schema context: database-v1
+A section on database-level throughput: shared vs. dedicated, autoscale vs. manual, the RU/s ceiling - described as outcomes ("provisions throughput at the database level, shared across all N containers"), not as the commands/flags used to set it up. State whether shared-vs-dedicated is changeable later or locked in permanently, and point to the ai-context file for how it was confirmed.
+A section with a Container | Partition key | Unique keys table for every container, plus one sentence on whether unique keys or dedicated throughput are configured anywhere - again as outcomes only, never naming the CLI flag that would or wouldn't set them.
+A "When you need more than this" section pointing to the ai-context file for per-container field shapes, indexing policy defaults, naming gotchas, and example queries.
+A "When to Apply" section: trigger for database-v1-specific work, explicitly not for v2/v3/v4.
+Hard rule for this file: never mention how the database/containers/items were created - no mkdb, mkcon, mkitem, --unique_key, .csh script names, or any other infrastructure/provisioning command or flag. This file describes the database's current shape and configuration, not how it got that way. Anything about how a claim was verified belongs only in the ai-context file below.
+
+2. ai-context/cosmosdb-context-database-v1.md
+
+The deep-dive companion, with:
+
+An intro paragraph on what schema variant this is, and how it relates to this repo's other database versions.
+A "Structure and configuration" section: compact per-container field shapes ({ field, field, [] }, [] marks arrays), with a note on where each container's shape was sourced from (init script or live query - this file is allowed to cover provisioning mechanics), and the total document count.
+A database-level config subsection: throughput mode confirmed via a live check against the running emulator (state exactly which MCP tool/command call confirmed it) or via the init script that created it - say which source backs the claim.
+A per-container config subsection: partition key, unique keys, dedicated throughput, indexing policy - as a table, each row noting whether it's immutable-after-creation or changeable-later, plus the exact init-script line or live-shell check that backs it.
+A "Gotchas" section for anything confusable (similarly-named containers, non-obvious foreign keys, composite ids).
+An "Example MCP-shell queries" section with real, working queries run against the live cosmosdb MCP connection, each with a one-line explanation of what it returns.
+Ground every config claim in one of two sources: the actual creation flags in the repo's init scripts, or a live check against the running emulator via the cosmosdb MCP tools (ls, query, throughput, info) - state which source backs each claim. Cross-link the two files with @ai-context/... references. Match document counts to README.md's table. Don't fabricate anything not verifiable from the scripts or the live shell.
+
+3. Symlinks
+
+Create relative symlinks so Copilot and Claude pick up the skill the same way the other cosmosdb-* skills are wired: .claude/skills/cosmosdb-context-database-v1 -> ../../.agents/skills/cosmosdb-context-database-v1 and .github/skills/cosmosdb-context-database-v1 -> ../../.agents/skills/cosmosdb-context-database-v1.
+```
 The split in that prompt is the actual design decision, tightened into a hard rule: the skill only states outcomes — container names, partition keys, unique keys, the database-level throughput mode — never the `mkdb`/`mkcon`/`mkitem` commands or `.csh` script names that produced them. Everything about *how* a claim was verified — field shapes, indexing defaults, gotchas, example queries, and which init script or live shell call backs each fact — moves to the context file instead, pulled in only via an `@`-reference when the agent actually needs that depth. Two files, two lifetimes: one small enough to sit in context permanently, one detailed enough to be worth reading only on demand.
 
 The prompt gets you most of the way there, but read what it generates before you trust it — spot-check the facts against your own source of truth, and adjust the prompt itself if something's off. The two files are:
