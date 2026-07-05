@@ -52,6 +52,8 @@ gh copilot -- mcp list
 gh copilot -- mcp list --json
 ```
 
+- `.mcp.json` also configures a `cosmosdb` MCP server (Streamable HTTP, `http://127.0.0.1:6128/`) backed by `cosmosdbshell --mcp` running in its own terminal. That server keeps its connection alive across tool calls for the whole session, so **do not call `connect` at the start of a session just because it seems safe** — it's redundant for this setup and can be counterproductive. Only call `connect` if a command actually fails due to no active connection.
+
 ## High-level architecture
 
 - This repo is a DP-420 learning workspace centered on **Azure Cosmos DB emulator workflows**, with two independent .NET console apps in `src/`:

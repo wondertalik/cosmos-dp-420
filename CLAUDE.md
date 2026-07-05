@@ -300,3 +300,4 @@ Use these when designing schemas, optimizing queries, or troubleshooting perform
 
 - Copilot workspace MCP config is shared in `.mcp.json` so Copilot sessions started from this repository can discover the same Context7 server.
 - Keep `.claude/settings.local.json` for developer-specific local overrides only (it is intentionally not committed).
+- `.mcp.json` also configures a `cosmosdb` MCP server (Streamable HTTP, `http://127.0.0.1:6128/`) backed by `cosmosdbshell --mcp` running in its own terminal. That server keeps its connection alive across tool calls for the whole session, so **do not call `connect` at the start of a session just because it seems safe** — it's redundant for this setup and can be counterproductive. Only call `connect` if a command actually fails due to no active connection.
